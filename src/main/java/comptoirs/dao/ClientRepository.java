@@ -4,6 +4,7 @@ package comptoirs.dao;
 import comptoirs.entity.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ public interface ClientRepository extends JpaRepository<Client, String> {
      * Calcule le nombre d'articles commandés par un client
      * @param clientCode la clé du client
      */
-    @Query("SELECT 0")
+    @Query("SELECT COALESCE(SUM(l.quantite), 0) FROM Ligne l WHERE l.commande.client.code = :clientCode ")
     int nombreArticlesCommandesPar(String clientCode);
 
     /**
@@ -41,5 +42,35 @@ public interface ClientRepository extends JpaRepository<Client, String> {
      */
     @Query("SELECT l.commande.client.societe as societe, COUNT(DISTINCT l.produit.reference) AS nombre FROM Ligne l GROUP BY societe")
     List<NombreDeProduitsDifferentsParClient> produitsParClient();
+
+
+    @Query("SELECT SUM(l.quantite) FROM Ligne l WHERE l.commande.client.code = :clientCode")
+    Integer calculerNombreArticlesCommandes(@Param("clientCode") String clientCode);
+
+
+    @Query("SELECT c FROM Commande c WHERE c.client.code = :codeClient")
+    List<CommandeProjection> commandesPourClient(@Param("codeClient") String codeClient);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
